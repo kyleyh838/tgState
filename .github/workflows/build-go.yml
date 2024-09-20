@@ -3,6 +3,8 @@ name: Go
 on:
   release:
     types: ["created"]
+    branches:
+      - edit
 
 jobs:
   build_and_upload_assets:
