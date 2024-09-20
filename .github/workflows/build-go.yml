@@ -2,18 +2,15 @@ name: Go
 
 on:
   release:
-    types: ["created"]
+    types: [ "created" ]
 
 jobs:
   build_and_upload_assets:
-    permissions:
-      contents: write
+    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          ref: edit
 
       - name: Set up Go
         uses: actions/setup-go@v3
@@ -24,53 +21,63 @@ jobs:
         run: |
           sed -i 's/go 1.20/go 1.17/' go.mod
 
-      - name: Install zip
-        run: sudo apt-get install -y zip
+      - name: Download dependencies
+        run: go mod tidy
 
-      - name: Build and Zip for FreeBSD amd64
-        run: |
-          CGO_ENABLED=0 GOOS=freebsd GOARCH=amd64 go build -o tgState main.go
-          zip tgState_freebsd_amd64.zip tgState
-          rm tgState
-
-      - name: Build and Zip for Linux arm64
+      - name: Build Linux arm64
         run: |
           CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o tgState main.go
-          zip tgState_linux_arm64.zip tgState
+
+      - name: Zip Linux amd64
+        run: |
+          sudo apt-get install -y zip
+          zip tgState_arm64.zip tgState
+
+      - name: Delete tgState arm64
+        run: |
           rm tgState
 
-      - name: Build and Zip for Linux amd64
+      - name: Build Linux amd64
         run: |
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o tgState main.go
-          zip tgState_linux_amd64.zip tgState
-          rm tgState
 
-      - name: Upload FreeBSD amd64 asset
+      - name: Zip Linux amd64
+        run: |
+          sudo apt-get install -y zip
+          zip tgState.zip tgState
+
+      - name: Upload server asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./tgState_freebsd_amd64.zip
-          asset_name: tgState_freebsd_amd64.zip
+          asset_path: ./tgState.zip
+          asset_name: tgState.zip
           asset_content_type: application/zip
 
-      - name: Upload Linux arm64 asset
+      - name: Upload server asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./tgState_linux_arm64.zip
-          asset_name: tgState_linux_arm64.zip
+          asset_path: ./tgState_arm64.zip
+          asset_name: tgState_arm64.zip
           asset_content_type: application/zip
+    
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: Upload Linux amd64 asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./tgState_linux_amd64.zip
-          asset_name: tgState_linux_amd64.zip
-          asset_content_type: application/zip
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: csznet/tgstate:latest
