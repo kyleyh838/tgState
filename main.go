@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"csz.net/tgstate/conf"
 	"csz.net/tgstate/control"
 	"csz.net/tgstate/utils"
+	"github.com/joho/godotenv"
 )
 
 var webPort string
@@ -33,6 +35,7 @@ func web() {
 		}
 		http.HandleFunc("/api", control.Middleware(control.UploadImageAPI))
 		http.HandleFunc("/", control.Middleware(control.Index))
+		http.HandleFunc("/favicon.ico", control.Favicon)
 	}
 
 	if listener, err := net.Listen("tcp", ":"+webPort); err != nil {
@@ -47,17 +50,26 @@ func web() {
 }
 
 func init() {
-	flag.StringVar(&webPort, "port", "8088", "Web Port")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	defaultPort := os.Getenv("PORT")
+	if defaultPort == "" {
+		defaultPort = "8088"
+	}
+	flag.StringVar(&webPort, "port", defaultPort, "Web Port")
+
 	flag.StringVar(&conf.BotToken, "token", os.Getenv("token"), "Bot Token")
 	flag.StringVar(&conf.ChannelName, "target", os.Getenv("target"), "Channel Name or ID")
 	flag.StringVar(&conf.Pass, "pass", os.Getenv("pass"), "Visit Password")
 	flag.StringVar(&conf.Mode, "mode", os.Getenv("mode"), "Run mode")
 	flag.StringVar(&conf.BaseUrl, "url", os.Getenv("url"), "Base Url")
+	flag.StringVar(&conf.Background, "background", os.Getenv("background"), "Background Image URL")
 	flag.Parse()
+
 	if conf.Mode == "m" {
 		OptApi = false
-	}
-	if conf.Mode != "p" && conf.Mode != "m" {
-		conf.Mode = "p"
 	}
 }

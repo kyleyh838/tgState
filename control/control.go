@@ -16,6 +16,10 @@ import (
 	"csz.net/tgstate/utils"
 )
 
+type TemplateData struct {
+	Background string
+}
+
 // UploadImageAPI 上传图片api
 func UploadImageAPI(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -34,7 +38,7 @@ func UploadImageAPI(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// 检查文件类型
-		allowedExts := []string{".jpg", ".jpeg", ".png"}
+		allowedExts := []string{".jpg", ".jpeg", ".png", ".gif", ".webp"}
 		ext := filepath.Ext(header.Filename)
 		valid := false
 		for _, allowedExt := range allowedExts {
@@ -44,8 +48,8 @@ func UploadImageAPI(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if conf.Mode != "p" && !valid {
-			errJsonMsg("Invalid file type. Only .jpg, .jpeg, and .png are allowed.", w)
-			// http.Error(w, "Invalid file type. Only .jpg, .jpeg, and .png are allowed.", http.StatusBadRequest)
+			errJsonMsg("Invalid file type. Only .jpg, .jpeg, .png, .gif and .webp are allowed.", w)
+			// http.Error(w, "Invalid file type. Only .jpg, .jpeg, .png, .gif and .webp are allowed.", http.StatusBadRequest)
 			return
 		}
 		res := conf.UploadResponse{
@@ -218,9 +222,14 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 创建模板数据
+	data := TemplateData{
+		Background: conf.Background,
+	}
+
 	// 直接将HTML内容发送给客户端
 	w.Header().Set("Content-Type", "text/html")
-	err = tmpl.Execute(w, nil)
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		http.Error(w, "Error rendering HTML template", http.StatusInternalServerError)
 	}
@@ -284,4 +293,16 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 		next(w, r)
 	}
+}
+
+func Favicon(w http.ResponseWriter, r *http.Request) {
+	faviconFile, err := assets.Favicon.Open("favicon.ico")
+	if err != nil {
+		http.Error(w, "Favicon not found", http.StatusNotFound)
+		return
+	}
+	defer faviconFile.Close()
+
+	w.Header().Set("Content-Type", "image/x-icon")
+	io.Copy(w, faviconFile)
 }

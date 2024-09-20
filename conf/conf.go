@@ -5,6 +5,7 @@ var ChannelName string
 var Pass string
 var Mode string
 var BaseUrl string
+var Background string
 
 type UploadResponse struct {
 	Code    int    `json:"code"`
