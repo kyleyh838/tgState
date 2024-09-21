@@ -1,31 +1,11 @@
-tgState
-==
-
-[English](https://github.com/csznet/tgState/blob/main/README_en.md) 
-
-一款以Telegram作为储存的文件外链系统
-
-不限制文件大小和格式
-
-可以作为telegram图床，也可以作为telegram网盘使用。
-
-支持web上传文件和telegram直接上传
-
-搭配CLoudFlare使用：https://github.com/csznet/tgState/blob/main/CloudFlare.md
-
-如有疑惑，可以咨询TG @tgstate123  
 
 # 演示
-
-https://tgstate.vercel.app / https://tgstate.ikun123.com/
-
-搭建在vercel，资源限制，大于5MB的文件不支持
-
-不限制大小demo（临时） http://tgstate-cdn.ikun123.com/
+部署在Serv00，偶尔可能抽风😂   
+https://imgs.vwwv.eu.org
 
 演示图片：
 
-![tgState](https://tgstate.vercel.app/d/BQACAgUAAx0EcyK3ugACByxlOR-Nfl4esavoO4zdaYIP_k1KYQACDAsAAkf4yFVpf_awaEkS8jAE)  
+![tgState](https://imgs.vwwv.eu.org/d/CAACAgUAAxkDAANJZu6ELCirivGdotUx9HbfV-mjxHoAAjcSAAKb_XBX5KYKF29fU8g2BA)  
 
 # 参数说明
 
@@ -39,7 +19,8 @@ https://tgstate.vercel.app / https://tgstate.ikun123.com/
  - pass
  - mode
  - url
- - port
+ - PORT
+ - background
 
 ## target
 
@@ -57,20 +38,26 @@ https://tgstate.vercel.app / https://tgstate.ikun123.com/
 
 ## pass
 
-填写访问密码，如不需要，直接填写```none```即可
+填写访问密码，如不需要，留空即可
 
 ## mode
 
  - ```p``` 代表网盘模式运行，不限制上传后缀
  - ```m``` 在p模式的基础上关闭网页上传，可私聊进行上传（如果target是个人，则只支持指定用户进行私聊上传
+ - 留空以纯图床模式运行
 
 ## url
 
 bot获取FileID的前置域名地址自动补充及api返回完整url的补充
 
-## port
+## PORT
 
 自定义运行端口
+
+## background
+
+背景图片,填入图片url,留空纯色   
+如需开启轮播，多张图片url以","分隔
 
 # 管理
 
@@ -82,75 +69,55 @@ bot获取FileID的前置域名地址自动补充及api返回完整url的补充
 
 ![image](https://github.com/csznet/tgState/assets/127601663/5b1fd6c0-652c-41de-bb63-e2f20b257022)
 
-# 部署
+# 二进制部署
 
-## 二进制
+## 手动
 
 Linux amd64下载
 
 ```
-wget https://github.com/csznet/tgState/releases/latest/download/tgState.zip && unzip tgState.zip && rm tgState.zip
+wget https://github.com/kyleyh838/tgState/releases/latest/download/tgState_linux_amd64.zip && unzip tgState_linux_amd64.zip && rm tgState_linux_amd64.zip
+wget https://raw.githubusercontent.com/kyleyh838/tgState/refs/heads/edit/.env
 ```
 
 Linux arm64下载
 
 ```
-wget https://github.com/csznet/tgState/releases/latest/download/tgState_arm64.zip && unzip tgState_arm64.zip && rm tgState_arm64.zip
+wget https://github.com/kyleyh838/tgState/releases/latest/download/tgState_linux_arm64.zip && unzip tgState_linux_arm64.zip && rm tgState_linux_arm64.zip
+wget https://raw.githubusercontent.com/kyleyh838/tgState/refs/heads/edit/.env
 ```
-
-Linux 一键脚本
+FreeBSD amd64下载
 
 ```
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/csznet/tgState/main/get.sh)"
+wget https://github.com/kyleyh838/tgState/releases/latest/download/tgState_freebsd_amd64.zip && unzip tgState_freebsd_amd64.zip && rm tgState_freebsd_amd64.zip
+wget https://raw.githubusercontent.com/kyleyh838/tgState/refs/heads/edit/.env
 ```
-
 
 **使用方法**
 
+填写参数
 ```
- ./tgState 参数
+vim .env
 ```
 
-**例子**
+运行程序
 ```
- ./tgState -token xxxx -target @xxxx
+./tgState
 ```
 
 **后台运行**
 
 ```
-nohup ./tgState 参数 &
+nohup ./tgState &
 ```
 
-## Docker
+***
 
-pull镜像
-```
-docker pull csznet/tgstate:latest
-```
+## 一键脚本
 
-启动
 ```
-docker run -d -p 8088:8088 --name tgstate 参数 --net=host csznet/tgstate:latest
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/kyleyh838/tgState/refs/heads/edit/get.sh)"
 ```
-其中docker的参数需要设置为环境变量
-
-开机自启需要加上
-```
---restart always
-```
-
-
-**例子**
-```
-docker run -d -p 8088:8088 --name tgstate -e token=token -e target=@target -e mode=p --net=host csznet/tgstate:latest
-```
-
-## Vercel
-
-不支持大于5mb文件，不支持tg获取文件路径
-
- [点我传送至Vercel配置页面](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcsznet%2FtgState&env=token&env=target&env=pass&env=mode&env=url&project-name=tgState&repository-name=tgState)  
 
 # API说明
 
